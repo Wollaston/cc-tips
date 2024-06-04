@@ -1,6 +1,7 @@
 interface StaffMember {
 	name: string;
 	card_id: string;
+	eid: number;
 	created: string;
 }
 
@@ -24,4 +25,20 @@ interface Tip {
 	hourly_pay_for_night: number;
 	duration: number;
 	eid: number;
+}
+
+interface MemberDetail {
+	name: string;
+	eid: number;
+	card_id: string;
+}
+
+interface MemberDetailResponse {
+	staff_member: MemberDetail;
+	tips: TipSummary[];
+}
+
+interface TipSummary {
+	date: string;
+	net_tips: number;
 }

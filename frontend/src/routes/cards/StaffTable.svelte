@@ -11,26 +11,30 @@
 	import DataTableActions from './data-table-actions.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
-	import File from 'lucide-svelte/icons/file';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
 	import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
-	import DateRangePicker from './DateRangePicker.svelte';
 	import type { Writable } from 'svelte/store';
 	import StaffMemberForm from './StaffMemberForm.svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
-	import type { FormSchema } from './schema';
+	import type { FormSchema as RegisterSchema } from './registerSchema.ts';
+	import type { FormSchema as ImportSchema } from './importSchema.ts';
+	import ImportStaffForm from './ImportStaffForm.svelte';
+	import { FileDown } from 'lucide-svelte';
 
 	interface StaffMember {
 		name: string;
 		card_id: string;
+		eid: number;
 		created: string;
 	}
+
 	export let staff: Writable<StaffMember[]>;
-	export let data: SuperValidated<Infer<FormSchema>>;
+	export let registerData: SuperValidated<Infer<RegisterSchema>>;
+	export let importData: SuperValidated<Infer<ImportSchema>>;
 
 	const table = createTable(staff, {
 		page: addPagination(),
@@ -46,6 +50,18 @@
 		table.column({
 			accessor: 'name',
 			header: 'Name',
+			plugins: {
+				sort: {
+					disable: false
+				},
+				filter: {
+					exclude: false
+				}
+			}
+		}),
+		table.column({
+			accessor: 'eid',
+			header: 'Eid',
 			plugins: {
 				sort: {
 					disable: false
@@ -88,10 +104,10 @@
 			}
 		}),
 		table.column({
-			accessor: ({ id }) => id,
+			accessor: ({ eid }) => eid,
 			header: '',
 			cell: ({ value }) => {
-				return createRender(DataTableActions, { id: value });
+				return createRender(DataTableActions, { eid: value });
 			},
 			plugins: {
 				sort: {
@@ -139,20 +155,20 @@
 <Card.Root>
 	<div class="flex">
 		<Card.Header class="px-7">
-			<Card.Title>Staff and Tip Data</Card.Title>
-			<Card.Description>A list of current tipped staff and their tips</Card.Description>
+			<Card.Title>Staff Member Data</Card.Title>
+			<Card.Description>A list of current tipped staff in the database</Card.Description>
 		</Card.Header>
 		<div class="m-2 ml-auto flex items-center gap-2 p-2">
-			<StaffMemberForm {data} />
+			<StaffMemberForm data={registerData} />
 			<Button on:click={() => generate_csv()} size="sm" variant="outline" class="gap-1 text-sm">
-				<File class="h-3.5 w-3.5" />
+				<FileDown class="h-3.5 w-3.5" />
 				<span>Export</span>
 			</Button>
+			<ImportStaffForm data={importData} />
 		</div>
 	</div>
 	<Card.Content>
 		<div>
-			<DateRangePicker />
 			<div class="flex items-center py-4">
 				<Input
 					class="max-w-sm"

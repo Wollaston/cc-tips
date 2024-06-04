@@ -1,3 +1,7 @@
 import { writable, type Writable } from 'svelte/store';
 
-export const staffStore: Writable<StaffMember[]> = writable<StaffMember[]>([]);
+const staffStore: Writable<StaffMember[]> = writable<StaffMember[]>([]);
+
+const memberDetailStore: Writable<MemberDetailResponse> = writable<MemberDetailResponse>();
+
+export { staffStore, memberDetailStore };

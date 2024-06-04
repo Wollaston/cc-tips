@@ -2,8 +2,37 @@
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
+	import { memberDetailStore } from '$lib/stores';
 
-	export let id: string;
+	export let eid: number;
+
+	interface MemberDetail {
+		name: string;
+		eid: number;
+		card_id: string;
+	}
+
+	interface MemberDetailResponse {
+		staff_member: MemberDetail;
+		tips: TipSummary[];
+	}
+
+	interface TipSummary {
+		date: string;
+		net_tips: number;
+	}
+
+	async function get_member_detail(eid: number) {
+		let res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/staff/${eid}`, {
+			method: 'post'
+		});
+
+		let data: MemberDetailResponse = await res.json();
+
+		console.log(data);
+
+		memberDetailStore.update(() => data);
+	}
 </script>
 
 <DropdownMenu.Root>
@@ -17,10 +46,10 @@
 		<DropdownMenu.Group>
 			<DropdownMenu.Label>Actions</DropdownMenu.Label>
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item on:click={() => navigator.clipboard.writeText(id)}>
-				Copy Item ID
+			<DropdownMenu.Item on:click={() => navigator.clipboard.writeText(String(eid))}>
+				Copy EID
 			</DropdownMenu.Item>
-			<DropdownMenu.Item>View Tab</DropdownMenu.Item>
+			<DropdownMenu.Item on:click={() => get_member_detail(eid)}>Summary</DropdownMenu.Item>
 		</DropdownMenu.Group>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
