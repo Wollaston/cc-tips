@@ -2,7 +2,7 @@
 	import PanelLeft from 'lucide-svelte/icons/panel-left';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
-	import { Calculator, CreditCard } from 'lucide-svelte';
+	import { Calculator, CreditCard, Receipt } from 'lucide-svelte';
 </script>
 
 <header
@@ -34,6 +34,17 @@
 				>
 					<CreditCard class="h-5 w-5" />
 					Cards
+				</a>
+			</nav>
+		</Sheet.Content>
+		<Sheet.Content side="left" class="sm:max-w-xs">
+			<nav class="grid gap-6 text-lg font-medium">
+				<a
+					href="/tips"
+					class="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+				>
+					<Receipt class="h-5 w-5" />
+					Tips
 				</a>
 			</nav>
 		</Sheet.Content>

@@ -78,7 +78,10 @@
 											}).format(new Date(tip.date + 'T00:00:00.000'))}
 										</dt>
 										<dd>
-											{tip.net_tips}
+											{new Intl.NumberFormat('en-US', {
+												style: 'currency',
+												currency: 'USD'
+											}).format(tip.net_tips)}
 										</dd>
 									</div>
 								{/each}

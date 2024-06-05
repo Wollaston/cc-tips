@@ -88,10 +88,11 @@
 			header: 'Created',
 			cell: ({ value }) => {
 				const formatted = new Intl.DateTimeFormat('en-US', {
-					dateStyle: 'short',
-					timeStyle: 'short',
-					timeZone: 'EST'
-				}).format(Date.parse(value));
+					year: 'numeric',
+					month: 'long',
+					day: 'numeric',
+					timeZone: 'America/New_York'
+				}).format(new Date(value));
 				return formatted;
 			},
 			plugins: {

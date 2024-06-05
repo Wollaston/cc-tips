@@ -42,3 +42,17 @@ interface TipSummary {
 	date: string;
 	net_tips: number;
 }
+
+interface TippedDay {
+	name: string;
+	employee: string;
+	role: string;
+	net_tips: number;
+	total_pay_for_night: number;
+	hourly_pay_for_night: number;
+	duration: number;
+	eid: number;
+	date: string;
+	created: string;
+	modified: string;
+}
