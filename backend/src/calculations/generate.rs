@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
 use std::hash::Hash;
+use surrealdb::sql::Thing;
 
 use crate::DB;
 
@@ -183,7 +184,11 @@ async fn post_to_db(df: DataFrame) -> Result<Vec<TippedDayCalculation>, PolarsEr
                     format!("{}_{}", tip.eid.clone(), tip.date.clone().as_str()),
                 ))
                 .content(TippedDayForCreate {
-                    employee: tip.employee,
+                    name: tip.employee,
+                    employee: Thing {
+                        tb: "staff".to_string(),
+                        id: tip.eid.into(),
+                    },
                     role: tip.role,
                     net_tips: tip.net_tips,
                     total_pay_for_night: tip.total_pay_for_night,
@@ -208,7 +213,8 @@ async fn post_to_db(df: DataFrame) -> Result<Vec<TippedDayCalculation>, PolarsEr
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TippedDayForCreate {
-    employee: String,
+    name: String,
+    employee: Thing,
     role: String,
     net_tips: f32,
     total_pay_for_night: f32,
