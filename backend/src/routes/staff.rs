@@ -17,8 +17,13 @@ use crate::DB;
 pub fn routes() -> Router {
     Router::new()
         .route("/staff", get(staff).post(new_staff_member))
-        .route("/staff/:eid", post(staff_detail))
+        .route(
+            "/staff/:eid",
+            get(staff_detail).post(staff_detail_tip_summary),
+        )
+        .route("/staff/:eid/summary", get(staff_summary_stats))
         .route("/import-staff", post(import_staff))
+        .route("/staff/csv", post(generate_csv))
 }
 
 pub async fn staff() -> impl IntoResponse {
@@ -46,7 +51,98 @@ pub async fn staff() -> impl IntoResponse {
 }
 
 pub async fn staff_detail(Path(eid): Path<i32>) -> impl IntoResponse {
-    dbg!(&eid);
+    let member = DB
+        .query(
+            "
+            SELECT * FROM staff WHERE eid=$eid;
+            ",
+        )
+        .bind(("eid", eid))
+        .await;
+
+    match member {
+        Ok(mut member) => {
+            let member: Option<StaffMember> = member.take(0).expect("Could not get staff data");
+            Json(member).into_response()
+        }
+        Err(err) => {
+            dbg!(&err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({
+                "error": err
+                })),
+            )
+                .into_response()
+        }
+    }
+}
+
+pub async fn staff_summary_stats(Path(eid): Path<i32>) -> impl IntoResponse {
+    #[derive(Serialize)]
+    struct StaffSummaryStats {
+        net_tips_sum: f32,
+        total_hours: f32,
+        total_pay: f32,
+        average_hourly: f32,
+    }
+
+    let net_tips_sum: Option<f32> = DB
+        .query(
+            "
+            let $value = SELECT array::flatten(net_tips) FROM tips WHERE eid=$eid GROUP ALL;
+            RETURN math::sum(object::values($value[0])[0]);
+            ",
+        )
+        .bind(("eid", eid))
+        .await
+        .expect("Could not sum net tips")
+        .take(1)
+        .expect("Could not get net tips");
+
+    let net_tips_sum = net_tips_sum.expect("Could not get sum of net tips");
+
+    let total_hours: Option<f32> = DB
+        .query(
+            "
+            let $value = SELECT array::flatten(duration) FROM tips WHERE eid=$eid GROUP ALL;
+            RETURN math::sum(object::values($value[0])[0]);
+            ",
+        )
+        .bind(("eid", eid))
+        .await
+        .expect("Could not sum net tips")
+        .take(1)
+        .expect("Could not get net tips");
+
+    let total_hours = total_hours.expect("Could not get total hours");
+
+    let total_pay: Option<f32> = DB
+        .query(
+            "
+            let $value = SELECT array::flatten(total_pay_for_night) FROM tips WHERE eid=$eid GROUP ALL;
+            RETURN math::sum(object::values($value[0])[0]);
+            ",
+        )
+        .bind(("eid", eid))
+        .await
+        .expect("Could not sum net tips")
+        .take(1)
+        .expect("Could not get net tips");
+
+    let total_pay = total_pay.expect("Could not get total pay");
+
+    let average_hourly: f32 = total_pay / total_hours;
+
+    Json(StaffSummaryStats {
+        net_tips_sum,
+        total_pay,
+        total_hours,
+        average_hourly,
+    })
+}
+
+pub async fn staff_detail_tip_summary(Path(eid): Path<i32>) -> impl IntoResponse {
     let member = DB
         .query(
             "
@@ -158,6 +254,33 @@ pub async fn read_import_csv(bytes: &[u8]) -> Result<Vec<StaffMemberForCreate>, 
     .await;
 
     Ok(staff)
+}
+
+async fn generate_csv(body: String) -> impl IntoResponse {
+    #[derive(Serialize, Deserialize)]
+    struct StaffCsvData {
+        name: String,
+        role: String,
+        date: String,
+        net_tips: f32,
+        total_pay_for_night: f32,
+        hourly_pay_for_night: f32,
+    }
+
+    let mut rdr = csv::Reader::from_reader(body.as_bytes());
+
+    let file_path = format!("public/downloads/staff-data-export_{}.csv", Utc::now());
+
+    let mut wtr = csv::Writer::from_path(file_path.clone()).expect("Could not init writer");
+
+    for result in rdr.deserialize() {
+        let record: StaffCsvData = result.expect("Could not deserialize to Struct");
+        wtr.serialize(record).expect("Could not serialize record");
+    }
+
+    wtr.flush().expect("Could not flush writer");
+
+    (StatusCode::OK, file_path)
 }
 
 #[derive(Deserialize, Serialize, Debug)]
