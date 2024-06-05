@@ -6,13 +6,34 @@
 		addSortBy,
 		addTableFilter
 	} from 'svelte-headless-table/plugins';
-	import { readable } from 'svelte/store';
+	import { type Writable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import DataTableActions from './data-table-actions.svelte';
-	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import CalendarIcon from 'svelte-radix/Calendar.svelte';
+	import {
+		CalendarDate,
+		DateFormatter,
+		type DateValue,
+		getLocalTimeZone,
+		parseDate,
+		today
+	} from '@internationalized/date';
+	import type { Infer, SuperValidated } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { page } from '$app/stores';
+	import { cn } from '$lib/utils.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+	import { Calendar } from '$lib/components/ui/calendar/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as Form from '$lib/components/ui/form/index.js';
 
 	import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
+	import { tipsSchema, type FormSchema as TipsSchema } from './schema';
+
+	export let data: SuperValidated<Infer<TipsSchema>> = $page.data.datePicker;
+	export let tippedDays: Writable<TippedDay[]>;
 
 	interface TippedDay {
 		name: string;
@@ -28,9 +49,7 @@
 		modified: string;
 	}
 
-	export let tippedDays: TippedDay[];
-
-	const table = createTable(readable(tippedDays), {
+	const table = createTable(tippedDays, {
 		page: addPagination({
 			initialPageSize: 25
 		}),
@@ -110,6 +129,24 @@
 		})
 	]);
 
+	const form = superForm(data, {
+		validators: zodClient(tipsSchema)
+	});
+
+	const { form: formData, enhance } = form;
+
+	const df = new DateFormatter('en-US', {
+		dateStyle: 'long'
+	});
+
+	let startDateValue: DateValue | undefined;
+	$: startDateValue = $formData.startDate ? parseDate($formData.startDate) : undefined;
+
+	let endDateValue: DateValue | undefined;
+	$: endDateValue = $formData.endDate ? parseDate($formData.endDate) : undefined;
+
+	let placeholder: DateValue = today(getLocalTimeZone());
+
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
 		table.createViewModel(columns);
 
@@ -119,13 +156,89 @@
 </script>
 
 <div class="rounded-md border">
+	<Input class="m-2 max-w-sm" placeholder="Filter table..." type="text" bind:value={$filterValue} />
 	<div class="flex items-center py-4">
-		<Input
-			class="m-2 max-w-sm"
-			placeholder="Filter table..."
-			type="text"
-			bind:value={$filterValue}
-		/>
+		<form method="POST" enctype="multipart/form-data" use:enhance class="m-2 flex items-end gap-2">
+			<Form.Field {form} name="startDate" class="flex flex-col">
+				<Form.Control let:attrs>
+					<Form.Label>Start Date</Form.Label>
+					<Popover.Root>
+						<Popover.Trigger
+							{...attrs}
+							class={cn(
+								buttonVariants({ variant: 'outline' }),
+								'w-[280px] justify-start pl-4 text-left font-normal',
+								!startDateValue && 'text-muted-foreground'
+							)}
+						>
+							{startDateValue
+								? df.format(startDateValue.toDate(getLocalTimeZone()))
+								: 'Pick a date'}
+							<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+						</Popover.Trigger>
+						<Popover.Content class="w-auto p-0" side="top">
+							<Calendar
+								value={startDateValue}
+								bind:placeholder
+								minValue={new CalendarDate(2024, 1, 1)}
+								maxValue={today(getLocalTimeZone())}
+								calendarLabel="Start Date"
+								initialFocus
+								onValueChange={(v) => {
+									if (v) {
+										$formData.startDate = v.toString();
+									} else {
+										$formData.startDate = '';
+									}
+								}}
+							/>
+						</Popover.Content>
+					</Popover.Root>
+					<Form.Description>The start date of the date range</Form.Description>
+					<Form.FieldErrors />
+					<input hidden value={$formData.startDate} name={attrs.name} />
+				</Form.Control>
+			</Form.Field>
+			<Form.Field {form} name="endDate" class="flex flex-col">
+				<Form.Control let:attrs>
+					<Form.Label>End Date</Form.Label>
+					<Popover.Root>
+						<Popover.Trigger
+							{...attrs}
+							class={cn(
+								buttonVariants({ variant: 'outline' }),
+								'w-[280px] justify-start pl-4 text-left font-normal',
+								!endDateValue && 'text-muted-foreground'
+							)}
+						>
+							{endDateValue ? df.format(endDateValue.toDate(getLocalTimeZone())) : 'Pick a date'}
+							<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+						</Popover.Trigger>
+						<Popover.Content class="w-auto p-0" side="top">
+							<Calendar
+								value={endDateValue}
+								bind:placeholder
+								minValue={new CalendarDate(2024, 1, 1)}
+								maxValue={today(getLocalTimeZone())}
+								calendarLabel="Start Date"
+								initialFocus
+								onValueChange={(v) => {
+									if (v) {
+										$formData.endDate = v.toString();
+									} else {
+										$formData.endDate = '';
+									}
+								}}
+							/>
+						</Popover.Content>
+					</Popover.Root>
+					<Form.Description>The end date of the date range</Form.Description>
+					<Form.FieldErrors />
+					<input hidden value={$formData.endDate} name={attrs.name} />
+				</Form.Control>
+			</Form.Field>
+			<Button type="submit">Submit</Button>
+		</form>
 	</div>
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>

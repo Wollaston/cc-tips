@@ -1,4 +1,10 @@
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, routing::get, Json, Router};
+use axum::{
+    extract::{Multipart, Path},
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
+};
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -8,17 +14,44 @@ use crate::DB;
 
 pub fn routes() -> Router {
     Router::new()
-        .route("/tips", get(tips))
+        .route("/tips", post(tips))
         .route("/tips/:eid", get(staff_member_tips))
 }
 
-pub async fn tips() -> impl IntoResponse {
+pub async fn tips(mut data: Multipart) -> impl IntoResponse {
+    #[derive(Default, Debug)]
+    struct TipsQuery<String> {
+        start_date: Option<String>,
+        end_date: Option<String>,
+    }
+    dbg!(&data);
+
+    let mut tips_query = TipsQuery::default();
+
+    while let Some(field) = data.next_field().await.unwrap() {
+        let name = field.name().unwrap();
+        match name {
+            "startDate" => {
+                tips_query.start_date =
+                    Some(field.text().await.expect("Could not get start_date text"))
+            }
+            "endDate" => {
+                tips_query.end_date = Some(field.text().await.expect("Could not get end_date text"))
+            }
+            _ => continue,
+        };
+    }
+
+    dbg!(&tips_query);
+
     let tips = DB
         .query(
             "
-            SELECT * from tips ORDER BY name ASC;
+            SELECT * from tips WHERE date >= $start AND date <= $end ORDER BY name ASC;
             ",
         )
+        .bind(("start", tips_query.start_date.unwrap_or("".to_string())))
+        .bind(("end", tips_query.end_date.unwrap_or("".to_string())))
         .await;
 
     match tips {

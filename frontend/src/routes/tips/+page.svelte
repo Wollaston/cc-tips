@@ -1,13 +1,32 @@
 <script lang="ts">
 	import File from 'lucide-svelte/icons/file';
-
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import DataTable from './data-table.svelte';
-	import type { Readable } from 'svelte/store';
+	import { writable, type Readable } from 'svelte/store';
+	import type { ActionData, PageData } from './$types';
 
-	export let data;
+	interface TippedDay {
+		name: string;
+		employee: string;
+		role: string;
+		net_tips: number;
+		total_pay_for_night: number;
+		hourly_pay_for_night: number;
+		duration: number;
+		eid: number;
+		date: string;
+		created: string;
+		modified: string;
+	}
+
+	export let data: PageData;
+	export let form: ActionData;
+
 	let exportedData: Readable<string>;
+
+	const tippedDays = writable<TippedDay[]>([]);
+	$: $tippedDays = form?.tippedDays ?? [];
 
 	async function generate_csv() {
 		console.log($exportedData);
@@ -32,7 +51,7 @@
 			</div>
 		</div>
 		<Card.Content>
-			<DataTable bind:exportedData tippedDays={data.tippedDays} />
+			<DataTable bind:exportedData data={data.tipsForm} {tippedDays} />
 		</Card.Content>
 		<Card.Footer>
 			<div class="text-xs text-muted-foreground">

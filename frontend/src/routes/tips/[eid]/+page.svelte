@@ -69,7 +69,7 @@
 				data-x-chunk-description="A card showing the total sales and the percentage difference from last month."
 			>
 				<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-					<Card.Title class="text-sm font-medium">Average Hourly Pay</Card.Title>
+					<Card.Title class="text-sm font-medium">Average Tipped Hour</Card.Title>
 				</Card.Header>
 				<Card.Content>
 					<div class="text-2xl font-bold">

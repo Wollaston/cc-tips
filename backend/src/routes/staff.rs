@@ -132,7 +132,7 @@ pub async fn staff_summary_stats(Path(eid): Path<i32>) -> impl IntoResponse {
 
     let total_pay = total_pay.expect("Could not get total pay");
 
-    let average_hourly: f32 = total_pay / total_hours;
+    let average_hourly: f32 = net_tips_sum / total_hours;
 
     Json(StaffSummaryStats {
         net_tips_sum,
