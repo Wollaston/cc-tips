@@ -5,6 +5,7 @@
 	import { memberDetailStore } from '$lib/stores';
 
 	export let eid: number;
+	let path = `/tips/${eid}`;
 
 	interface MemberDetail {
 		name: string;
@@ -50,6 +51,7 @@
 				Copy EID
 			</DropdownMenu.Item>
 			<DropdownMenu.Item on:click={() => get_member_detail(eid)}>Summary</DropdownMenu.Item>
+			<DropdownMenu.Item href={path}>Detail</DropdownMenu.Item>
 		</DropdownMenu.Group>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

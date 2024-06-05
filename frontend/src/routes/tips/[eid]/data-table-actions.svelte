@@ -19,6 +19,6 @@
 			<DropdownMenu.Label>Actions</DropdownMenu.Label>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item href={path}>Detail</DropdownMenu.Item>
+		<DropdownMenu.Item href={path}>Details</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

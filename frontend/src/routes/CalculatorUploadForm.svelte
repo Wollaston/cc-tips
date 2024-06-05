@@ -38,7 +38,7 @@
 	let placeholder: DateValue = today(getLocalTimeZone());
 </script>
 
-<Card.Root class="m-4">
+<Card.Root>
 	<Card.Header>
 		<Card.Title>Tip Pool Calculator</Card.Title>
 		<Card.Description>Use this form to run the tip pool for a specific day</Card.Description>

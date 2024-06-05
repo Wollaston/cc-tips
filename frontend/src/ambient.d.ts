@@ -3,6 +3,7 @@ interface StaffMember {
 	card_id: string;
 	eid: number;
 	created: string;
+	modified: string;
 }
 
 interface CalculationsResponse {

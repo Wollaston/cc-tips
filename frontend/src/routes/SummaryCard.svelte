@@ -6,7 +6,7 @@
 	export let total_tips;
 </script>
 
-<Card.Root class="m-4">
+<Card.Root>
 	<Card.Header>
 		<Card.Title>Tip Pool Summary</Card.Title>
 		<Card.Description>Summary statistics for the daily tip pool</Card.Description>

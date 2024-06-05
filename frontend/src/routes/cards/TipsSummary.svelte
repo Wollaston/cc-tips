@@ -48,7 +48,12 @@
 					>
 				</div>
 				<div class="ml-auto flex items-center gap-1">
-					<Button size="sm" variant="outline" class="h-8 gap-1">
+					<Button
+						size="sm"
+						variant="outline"
+						class="h-8 gap-1"
+						href={`/tips/${tips_summary.staff_member.eid}`}
+					>
 						<BookUser class="h-3.5 w-3.5" />
 						<span class="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">Detail</span>
 					</Button>

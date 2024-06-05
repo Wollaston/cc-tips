@@ -22,7 +22,7 @@
 	export let template_link;
 </script>
 
-<Card.Root class="m-4">
+<Card.Root>
 	<Card.Header class="flex flex-row justify-between">
 		<Card.Title>Calculated Tip Pool</Card.Title>
 		{#if valid}
