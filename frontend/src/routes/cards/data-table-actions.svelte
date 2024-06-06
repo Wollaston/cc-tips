@@ -47,9 +47,6 @@
 		<DropdownMenu.Group>
 			<DropdownMenu.Label>Actions</DropdownMenu.Label>
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item on:click={() => navigator.clipboard.writeText(String(eid))}>
-				Copy EID
-			</DropdownMenu.Item>
 			<DropdownMenu.Item on:click={() => get_member_detail(eid)}>Summary</DropdownMenu.Item>
 			<DropdownMenu.Item href={path}>Detail</DropdownMenu.Item>
 		</DropdownMenu.Group>
