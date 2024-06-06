@@ -28,8 +28,6 @@ export const actions: Actions = {
 
 		const tippedDays: TippedDay[] = await response.json();
 
-		console.log(tippedDays);
-
 		return {
 			tippedDays,
 			form

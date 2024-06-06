@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
+	import { createTable, Render, Subscribe } from 'svelte-headless-table';
 	import {
 		addDataExport,
 		addPagination,
@@ -8,7 +8,6 @@
 	} from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
-	import DataTableActions from './data-table-actions.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 
@@ -21,6 +20,7 @@
 		net_tips: number;
 		total_pay_for_night: number;
 		hourly_pay_for_night: number;
+		tipped_hour_for_night: number;
 		duration: number;
 		eid: number;
 		date: string;
@@ -95,7 +95,7 @@
 				}).format(value);
 				return formatted;
 			}
-		}),
+		})
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =

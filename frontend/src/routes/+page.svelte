@@ -16,17 +16,17 @@
 	<div>
 		<CalculatorUploadForm data={data.form} />
 		<SummaryCard
-			posted={form?.form.posted || false}
-			average_net_hourly_pay={form?.calculationsResponse?.summary.average_net_hourly_pay || 0}
-			total_tips={form?.calculationsResponse?.summary.total_tips || 0}
+			posted={form?.form.posted ?? false}
+			average_net_hourly_pay={form?.calculationsResponse?.summary.average_net_hourly_pay ?? 0}
+			total_tips={form?.calculationsResponse?.summary.total_tips ?? 0}
 		/>
 	</div>
 	<div class="xl:col-span-2">
 		<TipsTable
 			bind:template_link
 			bind:calculations_link
-			valid={form?.form.valid || false}
-			tips={form?.calculationsResponse?.tips || []}
+			valid={form?.form.valid ?? false}
+			tips={form?.calculationsResponse?.tips ?? []}
 		/>
 	</div>
 </div>

@@ -51,6 +51,7 @@ interface TippedDay {
 	net_tips: number;
 	total_pay_for_night: number;
 	hourly_pay_for_night: number;
+	tipped_hour_for_night: number;
 	duration: number;
 	eid: number;
 	date: string;

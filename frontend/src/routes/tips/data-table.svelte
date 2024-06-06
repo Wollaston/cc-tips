@@ -42,6 +42,7 @@
 		net_tips: number;
 		total_pay_for_night: number;
 		hourly_pay_for_night: number;
+		tipped_hour_for_night: number;
 		duration: number;
 		eid: number;
 		date: string;
@@ -59,6 +60,7 @@
 		}),
 		export: addDataExport({ format: 'csv' })
 	});
+
 	const columns = table.createColumns([
 		table.column({
 			accessor: 'name',
@@ -94,8 +96,8 @@
 			}
 		}),
 		table.column({
-			accessor: 'total_pay_for_night',
-			header: 'Total Pay',
+			accessor: 'tipped_hour_for_night',
+			header: 'Tipped Hour',
 			cell: ({ value }) => {
 				const formatted = new Intl.NumberFormat('en-US', {
 					style: 'currency',
@@ -106,7 +108,18 @@
 		}),
 		table.column({
 			accessor: 'hourly_pay_for_night',
-			header: 'Hourly Pay',
+			header: 'Total Hourly',
+			cell: ({ value }) => {
+				const formatted = new Intl.NumberFormat('en-US', {
+					style: 'currency',
+					currency: 'USD'
+				}).format(value);
+				return formatted;
+			}
+		}),
+		table.column({
+			accessor: 'total_pay_for_night',
+			header: 'Total Pay',
 			cell: ({ value }) => {
 				const formatted = new Intl.NumberFormat('en-US', {
 					style: 'currency',
@@ -129,11 +142,13 @@
 		})
 	]);
 
-	const form = superForm(data, {
-		validators: zodClient(tipsSchema)
+	$: form = superForm(data, {
+		validators: zodClient(tipsSchema),
+		invalidateAll: false,
+		resetForm: false
 	});
 
-	const { form: formData, enhance } = form;
+	$: ({ form: formData, enhance } = form);
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -158,7 +173,7 @@
 <div class="rounded-md border">
 	<Input class="m-2 max-w-sm" placeholder="Filter table..." type="text" bind:value={$filterValue} />
 	<div class="flex items-center py-4">
-		<form method="POST" enctype="multipart/form-data" use:enhance class="m-2 flex items-end gap-2">
+		<form method="POST" enctype="multipart/form-data" class="m-2 flex items-end gap-2" use:enhance>
 			<Form.Field {form} name="startDate" class="flex flex-col">
 				<Form.Control let:attrs>
 					<Form.Label>Start Date</Form.Label>
