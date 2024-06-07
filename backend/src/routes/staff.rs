@@ -24,6 +24,7 @@ pub fn routes() -> Router {
         .route("/staff/:eid/summary", get(staff_summary_stats))
         .route("/import-staff", post(import_staff))
         .route("/staff/csv", post(generate_csv))
+        .route("/staff/eid-name", get(eid_name))
 }
 
 pub async fn staff() -> impl IntoResponse {
@@ -42,6 +43,36 @@ pub async fn staff() -> impl IntoResponse {
         }
         Err(err) => (
             StatusCode::OK,
+            Json(json!({
+            "error": err
+            })),
+        )
+            .into_response(),
+    }
+}
+
+pub async fn eid_name() -> impl IntoResponse {
+    #[derive(Debug, Deserialize, Serialize)]
+    struct EidName {
+        name: String,
+        eid: i32,
+    }
+
+    let staff = DB
+        .query(
+            "
+            SELECT name, eid FROM staff;
+            ",
+        )
+        .await;
+
+    match staff {
+        Ok(mut staff) => {
+            let staff: Vec<EidName> = staff.take(0).expect("Could not get staff data");
+            Json(staff).into_response()
+        }
+        Err(err) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!({
             "error": err
             })),

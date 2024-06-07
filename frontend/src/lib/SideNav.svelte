@@ -1,7 +1,7 @@
 <script language="ts">
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Settings from 'lucide-svelte/icons/settings';
-	import { Receipt, Calculator, CreditCard } from 'lucide-svelte';
+	import { Wallet, Receipt, Calculator, CreditCard } from 'lucide-svelte';
 </script>
 
 <aside class="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -47,6 +47,20 @@
 				</a>
 			</Tooltip.Trigger>
 			<Tooltip.Content side="right">Tips</Tooltip.Content>
+		</Tooltip.Root>
+		<Tooltip.Root>
+			<Tooltip.Trigger asChild let:builder>
+				<a
+					href="/commissions"
+					class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+					use:builder.action
+					{...builder}
+				>
+					<Wallet class="h-5 w-5" />
+					<span class="sr-only">Commissions</span>
+				</a>
+			</Tooltip.Trigger>
+			<Tooltip.Content side="right">Commissions</Tooltip.Content>
 		</Tooltip.Root>
 	</nav>
 	<nav class="mt-auto flex flex-col items-center gap-4 px-2 py-4">

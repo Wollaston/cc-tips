@@ -5,44 +5,33 @@
 		addPagination,
 		addSortBy,
 		addTableFilter,
-		addHiddenColumns,
 		addDataExport
 	} from 'svelte-headless-table/plugins';
 	import DataTableActions from './data-table-actions.svelte';
 	import { Input } from '$lib/components/ui/input';
-	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
 	import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
 	import type { Writable } from 'svelte/store';
-	import StaffMemberForm from './StaffMemberForm.svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
-	import type { FormSchema as RegisterSchema } from './registerSchema.ts';
-	import type { FormSchema as ImportSchema } from './importSchema.ts';
-	import ImportStaffForm from './ImportStaffForm.svelte';
+	import type { FormSchema as CommissionsSchema } from './commissionsSchema';
+	import type { Commission, StaffNameEid, WineNamePrice } from '$lib/types';
 	import { FileDown } from 'lucide-svelte';
+	import CommissionsForm from './CommissionsForm.svelte';
 
-	interface StaffMember {
-		name: string;
-		card_id: string;
-		eid: number;
-		created: string;
-	}
+	export let commissions: Writable<Commission[]>;
+	export let commissionsData: SuperValidated<Infer<CommissionsSchema>>;
+	export let wines: WineNamePrice[];
+	export let staff: StaffNameEid[];
 
-	export let staff: Writable<StaffMember[]>;
-	export let registerData: SuperValidated<Infer<RegisterSchema>>;
-	export let importData: SuperValidated<Infer<ImportSchema>>;
-
-	const table = createTable(staff, {
+	const table = createTable(commissions, {
 		page: addPagination(),
 		sort: addSortBy(),
 		filter: addTableFilter({
 			fn: ({ filterValue, value }) => value.toLowerCase().includes(filterValue.toLowerCase())
 		}),
-		hide: addHiddenColumns(),
 		export: addDataExport({ format: 'csv' })
 	});
 
@@ -60,8 +49,8 @@
 			}
 		}),
 		table.column({
-			accessor: 'eid',
-			header: 'Eid',
+			accessor: 'wine',
+			header: 'Wine',
 			plugins: {
 				sort: {
 					disable: false
@@ -72,8 +61,8 @@
 			}
 		}),
 		table.column({
-			accessor: 'card_id',
-			header: 'Card ID',
+			accessor: 'amount',
+			header: 'Amount',
 			plugins: {
 				sort: {
 					disable: false
@@ -84,8 +73,8 @@
 			}
 		}),
 		table.column({
-			accessor: 'created',
-			header: 'Created',
+			accessor: 'date',
+			header: 'Date',
 			cell: ({ value }) => {
 				const formatted = new Intl.DateTimeFormat('en-US', {
 					year: 'numeric',
@@ -105,10 +94,10 @@
 			}
 		}),
 		table.column({
-			accessor: ({ eid }) => eid,
+			accessor: ({ product_id }) => product_id,
 			header: '',
 			cell: ({ value }) => {
-				return createRender(DataTableActions, { eid: value });
+				return createRender(DataTableActions, { product_id: value });
 			},
 			plugins: {
 				sort: {
@@ -121,22 +110,12 @@
 		})
 	]);
 
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns } =
+	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
 		table.createViewModel(columns);
 
 	const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
 	const { filterValue } = pluginStates.filter;
-	const { hiddenColumnIds } = pluginStates.hide;
 	const { exportedData } = pluginStates.export;
-
-	const ids = flatColumns.map((col) => col.id);
-	let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-
-	$: $hiddenColumnIds = Object.entries(hideForId)
-		.filter(([, hide]) => !hide)
-		.map(([id]) => id);
-
-	const hidableCols = ['itemId', 'created'];
 
 	async function generate_csv() {
 		let res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/tips/csv`, {
@@ -160,16 +139,15 @@
 <Card.Root>
 	<div class="flex">
 		<Card.Header class="px-7">
-			<Card.Title>Staff Member Data</Card.Title>
-			<Card.Description>A list of current tipped staff in the database</Card.Description>
+			<Card.Title>Commissions Data</Card.Title>
+			<Card.Description>A list of commissions in the database</Card.Description>
 		</Card.Header>
 		<div class="m-2 ml-auto flex items-center gap-2 p-2">
-			<StaffMemberForm data={registerData} />
+			<CommissionsForm {commissionsData} {wines} {staff} />
 			<Button on:click={() => generate_csv()} size="sm" variant="outline" class="gap-1 text-sm">
 				<FileDown class="h-3.5 w-3.5" />
 				<span>Export</span>
 			</Button>
-			<ImportStaffForm data={importData} />
 		</div>
 	</div>
 	<Card.Content>
@@ -181,22 +159,6 @@
 					type="text"
 					bind:value={$filterValue}
 				/>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger asChild let:builder>
-						<Button variant="outline" class="ml-auto" builders={[builder]}>
-							Hide Columns <ChevronDown class="ml-2 h-4 w-4" />
-						</Button>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content>
-						{#each flatColumns as col}
-							{#if hidableCols.includes(col.id)}
-								<DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
-									{col.header}
-								</DropdownMenu.CheckboxItem>
-							{/if}
-						{/each}
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
 			</div>
 			<Table.Root {...$tableAttrs}>
 				<Table.Header>

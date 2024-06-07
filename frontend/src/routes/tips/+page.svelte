@@ -30,7 +30,21 @@
 	$: $tippedDays = form?.tippedDays ?? [];
 
 	async function generate_csv() {
-		console.log($exportedData);
+		let res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/tips/csv`, {
+			method: 'POST',
+			body: $exportedData,
+			headers: {
+				'content-type': 'text/plain'
+			}
+		});
+
+		let text = await res.text();
+		console.log(text);
+
+		var testLink = document.createElement('a');
+		testLink.href = `${import.meta.env.VITE_BACKEND_URL}/${text}`;
+		testLink.setAttribute('download', '');
+		testLink.click();
 	}
 </script>
 

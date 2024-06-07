@@ -40,6 +40,7 @@ pub struct TippedDayCalculation {
     pub net_tips: f32,
     pub total_pay_for_night: f32,
     pub hourly_pay_for_night: f32,
+    pub tipped_hour_for_night: f32,
     pub duration: f32,
     pub eid: i32,
     pub date: String,

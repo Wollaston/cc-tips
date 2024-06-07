@@ -6,6 +6,7 @@ pub fn compute(
     labor_report_upload: LaborReportUpload,
     df: DataFrame,
 ) -> Result<DataFrame, PolarsError> {
+    dbg!(&df);
     let base_hours = compute_base_hours(df.clone())?;
     let total_tips = labor_report_upload.cash_tips + labor_report_upload.go_tab_tips;
     let df = proportion_of_total_tipped_hours(df, base_hours.clone())?;
@@ -16,6 +17,7 @@ pub fn compute(
     let df = proportion_of_total_steward_tips(df)?;
     let df = net_tips(df)?;
     let df = total_pay_for_night(df)?;
+    let df = tipped_hourly_for_night(df)?;
     hourly_pay_for_night(df)
 }
 
@@ -89,9 +91,10 @@ fn proportion_of_total_sales(total_sales: f32, df: DataFrame) -> Result<DataFram
 fn steward_tip_out(df: DataFrame) -> Result<DataFrame, PolarsError> {
     let steward_tip_out = 0.025;
     df.lazy()
-        .with_column(
+        .select([
+            col("*"),
             (col("proportion_of_total_sales") * lit(steward_tip_out)).alias("steward_tip_out"),
-        )
+        ])
         .collect()
 }
 
@@ -114,22 +117,44 @@ fn proportion_of_total_steward_tips(df: DataFrame) -> Result<DataFrame, PolarsEr
     let total_steward_tip_out = total_steward_tip_out(df.clone())?;
 
     df.lazy()
-        .with_column(
+        .select([
+            col("*"),
             (col("proportion_of_total_steward_hours") * lit(total_steward_tip_out))
                 .alias("proportion_of_total_steward_tips"),
-        )
+        ])
         .collect()
 }
 
 fn total_pay_for_night(df: DataFrame) -> Result<DataFrame, PolarsError> {
     df.lazy()
-        .with_column((col("total_pay") + col("net_tips")).alias("total_pay_for_night"))
+        .select([
+            col("*"),
+            (col("total_pay") + col("net_tips")).alias("total_pay_for_night"),
+        ])
         .collect()
 }
 
 fn hourly_pay_for_night(df: DataFrame) -> Result<DataFrame, PolarsError> {
     df.lazy()
-        .with_column((col("total_pay_for_night") / col("duration")).alias("hourly_pay_for_night"))
+        .select([
+            col("*"),
+            (col("total_pay_for_night") / col("duration")).alias("hourly_pay_for_night"),
+        ])
         .sort(["role"], Default::default())
         .collect()
+}
+
+fn tipped_hourly_for_night(df: DataFrame) -> Result<DataFrame, PolarsError> {
+    dbg!(&df);
+    let df = df
+        .lazy()
+        .clone()
+        .select([
+            col("*"),
+            (col("net_tips") / col("duration")).alias("tipped_hourly_for_night"),
+        ])
+        .collect();
+
+    dbg!(&df);
+    df
 }

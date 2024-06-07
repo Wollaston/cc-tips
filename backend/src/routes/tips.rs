@@ -16,6 +16,7 @@ pub fn routes() -> Router {
     Router::new()
         .route("/tips", post(tips))
         .route("/tips/:eid", get(staff_member_tips))
+        .route("/tips/csv", get(generate_csv))
 }
 
 pub async fn tips(mut data: Multipart) -> impl IntoResponse {
@@ -94,6 +95,24 @@ pub async fn staff_member_tips(Path(eid): Path<i32>) -> impl IntoResponse {
     }
 }
 
+async fn generate_csv(body: String) -> impl IntoResponse {
+    dbg!(&body);
+    let mut rdr = csv::Reader::from_reader(body.as_bytes());
+
+    let file_path = format!("public/downloads/tips-data-export_{}.csv", Utc::now());
+
+    let mut wtr = csv::Writer::from_path(file_path.clone()).expect("Could not init writer");
+
+    for result in rdr.deserialize() {
+        let record: TippedDay = result.expect("Could not deserialize to Struct");
+        wtr.serialize(record).expect("Could not serialize record");
+    }
+
+    wtr.flush().expect("Could not flush writer");
+
+    (StatusCode::OK, file_path)
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct TippedDay {
     name: String,
@@ -102,6 +121,7 @@ struct TippedDay {
     net_tips: f32,
     total_pay_for_night: f32,
     hourly_pay_for_night: f32,
+    tipped_hour_for_night: f32,
     duration: f32,
     eid: i32,
     date: NaiveDate,

@@ -168,10 +168,11 @@ async fn post_to_db(df: DataFrame) -> Result<Vec<TippedDayCalculation>, PolarsEr
             role: row[2].get_str().unwrap().to_string(),
             net_tips: row[11].try_extract().unwrap(),
             total_pay_for_night: row[12].try_extract().unwrap(),
-            hourly_pay_for_night: row[13].try_extract().unwrap(),
+            hourly_pay_for_night: row[14].try_extract().unwrap(),
+            tipped_hour_for_night: row[13].try_extract().unwrap(),
             duration: row[4].try_extract().unwrap(),
-            eid: row[15].try_extract().unwrap(),
-            date: row[16].get_str().unwrap().to_string(),
+            eid: row[16].try_extract().unwrap(),
+            date: row[17].get_str().unwrap().to_string(),
         })
         .collect();
 
@@ -193,6 +194,7 @@ async fn post_to_db(df: DataFrame) -> Result<Vec<TippedDayCalculation>, PolarsEr
                     net_tips: tip.net_tips,
                     total_pay_for_night: tip.total_pay_for_night,
                     hourly_pay_for_night: tip.hourly_pay_for_night,
+                    tipped_hour_for_night: tip.tipped_hour_for_night,
                     duration: tip.duration,
                     eid: tip.eid,
                     date: NaiveDate::parse_from_str(tip.date.as_str(), "%Y-%m-%d")
@@ -219,6 +221,7 @@ struct TippedDayForCreate {
     net_tips: f32,
     total_pay_for_night: f32,
     hourly_pay_for_night: f32,
+    tipped_hour_for_night: f32,
     duration: f32,
     eid: i32,
     date: NaiveDate,

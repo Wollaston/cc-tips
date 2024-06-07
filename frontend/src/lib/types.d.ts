@@ -1,4 +1,4 @@
-interface StaffMember {
+export interface StaffMember {
 	name: string;
 	card_id: string;
 	eid: number;
@@ -6,19 +6,19 @@ interface StaffMember {
 	modified: string;
 }
 
-interface CalculationsResponse {
+export interface CalculationsResponse {
 	calculations_link: string;
 	template_link: string;
 	summary: Summary;
 	tips: Tip[];
 }
 
-interface Summary {
+export interface Summary {
 	total_tips: number;
 	average_net_hourly_pay: number;
 }
 
-interface Tip {
+export interface Tip {
 	employee: string;
 	role: string;
 	net_tips: number;
@@ -28,23 +28,23 @@ interface Tip {
 	eid: number;
 }
 
-interface MemberDetail {
+export interface MemberDetail {
 	name: string;
 	eid: number;
 	card_id: string;
 }
 
-interface MemberDetailResponse {
+export interface MemberDetailResponse {
 	staff_member: MemberDetail;
 	tips: TipSummary[];
 }
 
-interface TipSummary {
+export interface TipSummary {
 	date: string;
 	net_tips: number;
 }
 
-interface TippedDay {
+export interface TippedDay {
 	name: string;
 	employee: string;
 	role: string;
@@ -59,13 +59,27 @@ interface TippedDay {
 	modified: string;
 }
 
-export type {
-	StaffMember,
-	CalculationsResponse,
-	Summary,
-	Tip,
-	MemberDetail,
-	MemberDetailResponse,
-	TipSummary,
-	TippedDay
-};
+export interface StaffNameEid {
+	name: string;
+	eid: number;
+}
+
+export interface WineNamePrice {
+	base_price: number;
+	display_price: string;
+	name: string;
+	product_id: number;
+}
+
+export interface Commission {
+	name: string;
+	wine: string;
+	amount: number;
+	product_id: number;
+	date: Date;
+}
+
+export interface Thing {
+	tb: string;
+	id: i32;
+}
